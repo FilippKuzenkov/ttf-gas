@@ -1,30 +1,34 @@
 # Data sources
 
-Committed before any pulling/cleaning code, per this project's own guardrail against the university-project failure mode (a silently swapped data source, an undetected bad aggregation). Any later change to either source is a dated append below, never a silent edit.
+This file documents where the raw data comes from. It's written before any cleaning or analysis code, so anyone can reproduce the pull from scratch. If a source ever changes, add a new dated note below instead of editing the old description.
 
 ## TTF gas price (EUR/MWh)
 
-- **Source:** ACER (Agency for the Cooperation of Energy Regulators), data item 1083, sourced from ICIS. ACER republishes ICIS's data — not ACER's own primary collection.
-- **Access path (human, reproducible):** `acer.europa.eu/key-developments-european-gas-wholesale-markets-winter-2025-2026` → "Additional information" → "Access the underlying datasets" → CHEST category 70 list → "TTF price (EUR/MWh)" → "Download whole data" → CSV. **Do not bookmark or direct-link the data item page itself** (`aegis.acer.europa.eu/chest/dataitems/1083/view`) — confirmed to break the download flow when reached that way; always go in through the report page.
-- **File:** `data/raw/TTF price _EUR_MWh_ - 20260421 (1).csv`
-- **Format:** CSV, columns `Date` (DD.MM.YYYY) / `Price, EUR/MWh`, one row per day.
-- **Range:** 01.01.2021–08.04.2026, **1,924 rows**.
-- **Units:** EUR/MWh, daily.
-- **Timezone:** not stated on the source; treated as a plain calendar date, no time-of-day component to convert.
-- **Downloaded:** 2026-09-08.
+**Source:** ACER (Agency for the Cooperation of Energy Regulators). The data itself originally comes from ICIS; ACER just republishes it.
+
+**How to get it:**
+1. Go to the ACER page: [Key developments in European gas wholesale markets (winter 2025-2026)](https://www.acer.europa.eu/key-developments-european-gas-wholesale-markets-winter-2025-2026)
+2. Scroll down to "Additional information" and click "Access the underlying datasets"
+3. Find "TTF price (EUR/MWh)" in the list and click it
+4. Click "Download whole data" and export as CSV
+
+**What's in the file:** one row per day, columns are `Date` (DD.MM.YYYY) and `Price, EUR/MWh`. Covers 01.01.2021 to 08.04.2026 — 1,924 rows.
 
 ## German day-ahead electricity price (EUR/MWh)
 
-- **Source:** SMARD (Bundesnetzagentur), series id 4169, filter DE.
-- **Endpoint:** `smard.de/app/chart_data/4169/DE/4169_DE_day_{timestamp}.json`. **The `{timestamp}` is not arbitrary** — despite "_day_" in the filename, each timestamp identifies a year-bucket of daily points, not a single day. Valid timestamps must come from `smard.de/app/chart_data/4169/DE/index_day.json`'s own list; a guessed value 404s.
-- **Pull script:** `scripts/pull_smard.py` — fetches every bucket the index lists (cheap, avoids re-deriving which buckets are needed), then filters to the target date range after parsing.
-- **File:** `data/raw/smard_electricity_de_2021_2026.csv`
-- **Format:** CSV, columns `date` (YYYY-MM-DD) / `price_eur_mwh`, one row per day.
-- **Range:** 2021-01-01–2026-04-08, **1,924 rows** — matches the TTF series exactly.
-- **Units:** EUR/MWh, daily.
-- **Timezone — the real gotcha, worth keeping documented:** SMARD's raw timestamps mark local German midnight, not UTC midnight, and Germany isn't a fixed UTC offset (CET = UTC+1 in winter, CEST = UTC+2 in summer under daylight saving). A naive UTC read of the raw epoch timestamp mislabels the date — e.g. Jan 1 2021 00:00 CET is Dec 31 2020 23:00 UTC. The pull script converts to `Europe/Berlin` before extracting the calendar date; comparing raw UTC timestamps against a UTC-implied date range silently drops the Jan 1 row every year. Two real bugs hit and fixed during this pull (2026-09-08): a UTC-year mislabeling that dropped the entire 2021 bucket, then this same-shape boundary issue dropping one row.
-- **Downloaded:** 2026-09-08.
+**Source:** SMARD, the official electricity market data platform run by Germany's Federal Network Agency (Bundesnetzagentur). We're using series 4169, filtered to Germany.
 
-## Join note (for session 0's own decision, not yet made)
+**How to get it:** run `scripts/pull_smard.py`. It calls SMARD's public JSON endpoint and saves a clean CSV.
 
-Both series are now daily and span the identical range (2021-01-01 to 2026-04-08, 1,924 rows each) — but gas trades on weekdays only in some conventions while electricity has a price every day. Confirm whether that's actually true of these two specific pulls (row-count parity suggests it might not be, but that needs checking against the actual weekday/weekend pattern, not assumed) before deciding forward-fill vs. inner-join-on-trading-days.
+A couple of things worth knowing if you ever touch that script:
+
+- The URL needs a specific timestamp in it, and that timestamp isn't a real date — it's just an ID for a whole year's worth of data. You can't guess one, you have to ask SMARD's index endpoint which ones exist. The script already does this.
+- The timestamps SMARD gives you are in UTC, but they're meant to represent midnight in Germany, and Germany's clock offset from UTC changes twice a year (daylight saving). If you're not careful, converting straight from UTC can quietly put a day on the wrong date — the Jan 1 reading for a whole year kept disappearing until this was fixed. The script converts to German local time first, then reads off the date, which fixes it.
+
+**File:** `data/raw/smard_electricity_de_2021_2026.csv`
+
+**What's in it:** one row per day, columns are `date` (YYYY-MM-DD) and `price_eur_mwh`. Covers 2021-01-01 to 2026-04-08 — 1,924 rows, same range and same count as the gas data above.
+
+## One thing still to figure out before joining them
+
+Both files have exactly 1,924 rows covering the same dates, which is a little suspicious — gas markets are usually closed on weekends, so I'd have expected fewer rows there than for electricity, which has a price every single day. Worth checking whether the gas file actually has real weekend values or just repeats Friday's price, before deciding how to join the two datasets.
