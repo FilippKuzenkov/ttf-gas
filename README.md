@@ -1,6 +1,6 @@
 # TTF Gas Price vs. German Day-Ahead Electricity Price
 
-**Decision.** Framed as if delivered to an energy trading/risk desk: is TTF gas price a reliable leading indicator for German day-ahead electricity price exposure, and under what conditions should that signal be trusted more or less? (No real client - this project is scoped and framed the way an actual desk would ask it, per the sourcing note at the bottom.)
+**Decision.** Framed as if delivered to an energy trading/risk desk: is TTF gas price a reliable leading indicator for German day-ahead electricity price exposure, and under what conditions should that signal be trusted more or less? 
 
 **North Star metrics.**
 1. **Correlation strength** - how tightly does gas price move with electricity price?
