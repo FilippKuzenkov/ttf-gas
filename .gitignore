@@ -7,3 +7,7 @@ reference/
 *.md
 !README.md
 !DATA_SOURCES.md
+!ANALYSIS.md
+
+# Superseded daily-resolution SMARD pull, replaced by the hourly one — never tracked
+data/raw/smard_electricity_de_2021_2026.csv
