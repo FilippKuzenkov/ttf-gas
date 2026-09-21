@@ -60,6 +60,18 @@
 
 **A concrete example of where the model earns its edge.** On a day when electricity price jumped sharply from an unusually low prior-day value, the naive baseline carried the low value forward and missed badly; the model, informed by gas price, missed by roughly half as much - not because it predicted the jump precisely, but because it wasn't anchored purely to a value that had just become stale.
 
+## Part 3: bringing both parts together into one view
+
+**Decision.** Parts 1 and 2 answer two different but connected questions — does gas price track electricity price, and does that relationship actually predict tomorrow's price better than a naive guess. Shown separately, a reader has to hold both in their head to see they're the same investigation deepening, not two unrelated analyses. This part exists to present them as one line of reasoning: correlation exists → does it hold up under real conditions → does it survive the harder test of out-of-sample prediction.
+
+**Not a new empirical finding.** Nothing below re-runs or extends the analysis in Parts 1-2 — it's the same evidence, organized for a reader who wants the conclusion first and the method available on request, rather than the method-first order the two parts above are written in.
+
+**Headline, in the order a reader should meet it:** TTF gas price is a genuine leading indicator for German electricity price (Part 1), strong enough that adding it to a simple model beats just assuming "tomorrow looks like today" (Part 2) — with both findings holding broadly but weakening in the same two conditions (weekends, winter) for reasons already established, not two unrelated caveats.
+
+**Scope, stated plainly rather than apologized for.** This uses one linear regression on two predictors, evaluated on a single chronological train/test split — not the cross-validation, ensemble methods, or higher-frequency data a professional forecasting desk would typically use. The goal is to test a specific, falsifiable question (does gas price add predictive signal over a naive baseline) with a transparent, reproducible method, not to build a production-grade forecasting system.
+
+**The single largest shared miss, explained rather than left as an unlabeled outlier.** The Tableau error chart (baseline error vs. model error, test period) shows one day — Nov 25, 2025 — where both baseline and model missed by roughly the same wide margin, the sharpest single-day move in the test window. This wasn't a gas-price story: it was a [Dunkelflaute](https://www.cleanenergywire.org/news/short-term-power-prices-spike-amid-new-dunkelflaute-germany-most-customers-unaffected) event — a sharp drop in German wind generation coinciding with a cold snap, pushing German day-ahead prices to a peak of €371.24/MWh that evening (daily average €220.52/MWh, the highest since January 2025) ([Bloomberg](https://www.bloomberg.com/news/articles/2025-11-25/european-short-term-power-prices-spike-as-wind-generation-drops)). A weather-driven supply shock like this is invisible to a model built on gas price and yesterday's electricity price alone — a real, named limitation rather than an unexplained residual, and the dashboard's point annotation on that date states it directly.
+
 ## Methodology, limitations, and scope
 
 **Sources and validation.** TTF gas (ACER/ICIS, daily, 2021-01-01 to 2026-04-08) and German day-ahead electricity (SMARD, hourly, same range) - both checked against independent references (energy-charts.info for electricity, Yahoo `TTF=F` for gas) before any analysis; gas's weekend carry-forward pattern confirmed across 4 separate weekends. Full detail, exact download steps, and known data quirks: [`DATA_SOURCES.md`](DATA_SOURCES.md).
