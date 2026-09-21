@@ -4,6 +4,8 @@ A two-part analysis on public energy-market data, framed as if delivered to an e
 
 **What it answers:** whether gas price is a reliable leading indicator for electricity price exposure, under what conditions that signal should be trusted more or less, and whether a simple model using gas price can beat a naive "tomorrow looks like today" baseline. Full write-up, findings, and charts: [`ANALYSIS.md`](ANALYSIS.md).
 
+**Interactive dashboard:** [TTF Gas vs. German Electricity — Tableau Public](TODO-add-link-after-publishing). Headline finding (model beats a naive baseline by 8.5% MAE) with the underlying Model MAE/Baseline MAE numbers available on hover, so the number can be checked rather than taken on faith; an error-comparison chart with reference lines for both MAE values; and the single largest shared miss (Nov 25, 2025) annotated with its real cause on hover, not left as an unexplained outlier.
+
 ## Data
 
 Two public sources, both daily-to-hourly resolution:
@@ -20,6 +22,7 @@ scripts/     ingestion, join, correlation and prediction analysis
 data/        raw pulls and the joined clean dataset
 charts/      exported analysis charts
 excel/       pivot-table workbook, a second-tool cut of the joined data
+dashboard/   Tableau workbook synthesizing both parts into one interactive view
 ```
 
 ## Reproducing this
