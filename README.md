@@ -15,6 +15,11 @@ Two public sources, both daily-to-hourly resolution:
 
 Full acquisition steps, join strategy, and validation against independent references: [`DATA_SOURCES.md`](DATA_SOURCES.md).
 
+**Sources and licences.**
+- Electricity price: Bundesnetzagentur | SMARD.de, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes made: filtered to Germany, hourly resolution, timestamps converted to local time.
+- Gas price: ACER, which republishes ICIS data. Check ACER's and ICIS's terms before reusing the file; the steps to download it yourself are in `DATA_SOURCES.md`.
+- The data is provided as is and was not audited by the source publishers.
+
 ## Repo layout
 
 ```
@@ -27,7 +32,7 @@ dashboard/   Tableau workbook synthesizing both parts into one interactive view
 
 ## Reproducing this
 
-Run the scripts in this order:
+Install the dependencies with `pip install -r requirements.txt`, then run the scripts in this order:
 
 ```
 scripts/pull_smard.py
@@ -43,4 +48,4 @@ Each step's row counts and a hand-traced sample can be checked against the raw i
 
 ## Tool stack
 
-Python (pandas, scikit-learn) for the analysis; [`excel/ttf_electricity.xlsx`](excel/ttf_electricity.xlsx) is a second-tool addition - a pivot-table view of the same joined data, plus Issues Log and Insights Log tabs.
+Python (pandas, numpy, matplotlib; the model is plain least squares in numpy) for the analysis; [`excel/ttf_electricity.xlsx`](excel/ttf_electricity.xlsx) is a second-tool addition - a pivot-table view of the same joined data, plus Issues Log and Insights Log tabs.
